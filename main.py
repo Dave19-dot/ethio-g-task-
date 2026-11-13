@@ -106,7 +106,6 @@ async def cmd_start(message: Message, state: FSMContext):
     if user_id not in users_db:
         users_db[user_id] = {"balance": 0.0, "refs": 0, "withdrawn": 0.0, "emails": 0, "lang": "am"}
     
-    # እዚህጋ ትክክለኛው የኢትዮጵያ ባንዲራ 🇪🇹 ተስተካክሏል
     lang_kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🇪🇹 አማርኛ", callback_data="lang_am"), InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en")]
     ])
@@ -210,7 +209,6 @@ async def handle_invite(message: Message):
 
 @user_dp.message(F.text.in_(["⚙️ Setting (ማስተካከያ)", "⚙️ Settings"]))
 async def handle_settings(message: Message):
-    # እዚህጋም የኢትዮጵያ ባንዲራ 🇪🇹 ተስተካክሏል
     lang_kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🇪🇹 አማርኛ", callback_data="lang_am"), InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en")]
     ])
@@ -219,7 +217,6 @@ async def handle_settings(message: Message):
 @user_dp.message(F.text.in_(["🆘 Help (እርዳታ)", "🆘 Help"]))
 async def handle_help(message: Message):
     await message.answer(f"🆘 **Help Desk**\n\nእርዳታ ለማግኘት ቦታችንን ያነጋግሩ: t.me/{(await Bot(token=HELP_BOT_TOKEN).get_me()).username}")
-
 
 admin_bot = Bot(token=ADMIN_BOT_TOKEN)
 admin_dp = Dispatcher(storage=MemoryStorage())
@@ -248,14 +245,13 @@ async def admin_messages(message: Message):
         await message.answer(f"📋 **Task List:**\n\n{res}", parse_mode="Markdown")
     elif text == "💸 ለማውጣት ያሉ":
         res = "\n".join([f"👤 {w['name']} | 📱 `{w['phone']}` | 💵 {w['amount']} ብር" for w in withdrawals_db]) or "📭 የለም"
-        await message.answer(f"💸 **Withdrawals:**\n\n{res}", parse_mode="Markdown")
+        await message.answer(f"💸 **Withdrawals:**\n\n{res}", parse_model="Markdown")
     elif text == "ℹ️ መረጃ (Info)":
         await message.answer(f"📊 ተጠቃሚዎች: {len(users_db)} | ስራዎች: {len(tasks_db)}")
     elif text == "👥 ብዙ የሰራ ሰው":
         sorted_u = sorted(users_db.items(), key=lambda x: x[1].get("emails", 0), reverse=True)
         res = "\n".join([f"ID: `{uid}` - {u['emails']} emails" for uid, u in sorted_u[:5]]) or "📭 የለም"
-        await message.answer(f"🏆 **Top Workers:**\n\n{res}", parse_mode="Markdown")
-
+        await message.answer(f"🏆 **Top Workers:**\n\n{res}", parse_model="Markdown")
 
 help_bot = Bot(token=HELP_BOT_TOKEN)
 help_dp = Dispatcher(storage=MemoryStorage())
@@ -269,8 +265,12 @@ async def help_forward(message: Message):
     await help_bot.send_message(ADMIN_USER_ID, f"📩 ከ ተጠቃሚ (`{message.from_user.id}`):\n\n{message.text}")
     await message.answer("✅ መልክቶን ተቀብለናል!")
 
-
 async def main():
+    print("🚀 All Telegram Bots are starting up...")
+    await user_bot.delete_webhook(drop_pending_updates=True)
+    await admin_bot.delete_webhook(drop_pending_updates=True)
+    await help_bot.delete_webhook(drop_pending_updates=True)
+    
     await asyncio.gather(
         user_dp.start_polling(user_bot),
         admin_dp.start_polling(admin_bot),
